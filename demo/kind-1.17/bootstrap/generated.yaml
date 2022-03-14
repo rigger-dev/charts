@@ -3757,18 +3757,20 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
-  namespace: secrets
+  namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
+  annotations: {}
   labels:
     name: sealed-secrets-key-admin
   name: sealed-secrets-key-admin
-  namespace: secrets
+  namespace: kube-system
 rules:
 - apiGroups:
   - ""
@@ -3781,10 +3783,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
+  annotations: {}
   labels:
     name: sealed-secrets-service-proxier
   name: sealed-secrets-service-proxier
-  namespace: secrets
+  namespace: kube-system
 rules:
 - apiGroups:
   - ""
@@ -3929,6 +3932,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
+  annotations: {}
   labels:
     name: secrets-unsealer
   name: secrets-unsealer
@@ -3987,10 +3991,11 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
+  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
-  namespace: secrets
+  namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -3998,15 +4003,16 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: sealed-secrets-controller
-  namespace: secrets
+  namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
+  annotations: {}
   labels:
     name: sealed-secrets-service-proxier
   name: sealed-secrets-service-proxier
-  namespace: secrets
+  namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -4109,6 +4115,7 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
+  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
@@ -4119,7 +4126,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: sealed-secrets-controller
-  namespace: secrets
+  namespace: kube-system
 ---
 apiVersion: v1
 kind: Service
@@ -4206,10 +4213,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
-  namespace: secrets
+  namespace: kube-system
 spec:
   ports:
   - port: 8080
@@ -4621,10 +4629,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
-  namespace: secrets
+  namespace: kube-system
 spec:
   minReadySeconds: 30
   replicas: 1
