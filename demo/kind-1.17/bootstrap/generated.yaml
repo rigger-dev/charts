@@ -3757,16 +3757,14 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
   namespace: kube-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  annotations: {}
   labels:
     name: sealed-secrets-key-admin
   name: sealed-secrets-key-admin
@@ -3780,10 +3778,9 @@ rules:
   - create
   - list
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  annotations: {}
   labels:
     name: sealed-secrets-service-proxier
   name: sealed-secrets-service-proxier
@@ -3792,7 +3789,16 @@ rules:
 - apiGroups:
   - ""
   resourceNames:
+  - sealed-secrets-controller
+  resources:
+  - services
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resourceNames:
   - 'http:sealed-secrets-controller:'
+  - http:sealed-secrets-controller:http
   - sealed-secrets-controller
   resources:
   - services/proxy
@@ -3885,6 +3891,45 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
+    name: secrets-unsealer
+  name: secrets-unsealer
+rules:
+- apiGroups:
+  - bitnami.com
+  resources:
+  - sealedsecrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - bitnami.com
+  resources:
+  - sealedsecrets/status
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
     app.kubernetes.io/instance: kind
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: metrics-server
@@ -3929,45 +3974,6 @@ rules:
   - list
   - watch
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  annotations: {}
-  labels:
-    name: secrets-unsealer
-  name: secrets-unsealer
-rules:
-- apiGroups:
-  - bitnami.com
-  resources:
-  - sealedsecrets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - bitnami.com
-  resources:
-  - sealedsecrets/status
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - create
-  - update
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -3988,10 +3994,9 @@ subjects:
   name: kind-metrics-server
   namespace: kube-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
@@ -4005,10 +4010,9 @@ subjects:
   name: sealed-secrets-controller
   namespace: kube-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  annotations: {}
   labels:
     name: sealed-secrets-service-proxier
   name: sealed-secrets-service-proxier
@@ -4097,6 +4101,21 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
+    name: sealed-secrets-controller
+  name: sealed-secrets-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: secrets-unsealer
+subjects:
+- kind: ServiceAccount
+  name: sealed-secrets-controller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
     app.kubernetes.io/instance: kind
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: metrics-server
@@ -4110,22 +4129,6 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: kind-metrics-server
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  annotations: {}
-  labels:
-    name: sealed-secrets-controller
-  name: sealed-secrets-controller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: secrets-unsealer
-subjects:
-- kind: ServiceAccount
-  name: sealed-secrets-controller
   namespace: kube-system
 ---
 apiVersion: v1
@@ -4213,7 +4216,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
@@ -4629,7 +4631,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: {}
   labels:
     name: sealed-secrets-controller
   name: sealed-secrets-controller
@@ -4657,7 +4658,7 @@ spec:
         command:
         - controller
         env: []
-        image: quay.io/bitnami/sealed-secrets-controller:v0.16.0
+        image: docker.io/bitnami/sealed-secrets-controller:v0.18.0
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
